@@ -1,0 +1,713 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electricity Bill Management System</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #edf2f7;
+    color: #183153;
+    padding: 20px;
+}
+
+.dashboard {
+    max-width: 1200px;
+    margin: auto;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+header {
+    background: #102744;
+    color: white;
+    padding: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+header p {
+    color: #cbd5e1;
+    margin-top: 7px;
+    font-size: 13px;
+}
+
+main { padding: 22px; }
+
+.welcome {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.welcome p {
+    color: #64748b;
+    margin-top: 7px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat, .panel, .table-panel {
+    border: 1px solid #dbe5f0;
+    border-radius: 8px;
+    padding: 18px;
+    min-width: 0;
+}
+
+.stat p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.stat h2 { margin-top: 10px; }
+
+.blue { color: #1683f8; }
+.green { color: #16a05a; }
+.orange { color: #f59e0b; }
+.purple { color: #8b45df; }
+
+.middle, .bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.panel h3, .table-panel h3 { margin-bottom: 15px; }
+
+.bar {
+    margin: 15px 0;
+    padding: 12px;
+    color: white;
+    border-radius: 5px;
+    min-width: 130px;
+    font-size: 13px;
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.action {
+    padding: 15px;
+    background: #eaf2fc;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.action:hover { filter: brightness(.95); }
+
+.action.green { background: #dcfce7; }
+.action.orange { background: #fef3c7; }
+.action.purple { background: #f3e8ff; }
+
+.search {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    outline-color: #1683f8;
+}
+
+.table-panel { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th {
+    background: #eaf2fc;
+    text-align: left;
+}
+
+th, td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.badge {
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.paid {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.unpaid {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.btn {
+    border: none;
+    border-radius: 5px;
+    padding: 7px 9px;
+    cursor: pointer;
+    font-size: 12px;
+    margin: 2px;
+}
+
+.pay { background: #dcfce7; color: #15803d; }
+.remove { background: #fee2e2; color: #b91c1c; }
+.primary { background: #1683f8; color: white; }
+
+.notice {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #eff6ff;
+    border-radius: 5px;
+    color: #1d4ed8;
+    display: none;
+}
+
+footer {
+    background: #edf3fa;
+    text-align: center;
+    padding: 15px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+@media (max-width: 750px) {
+    body { padding: 8px; }
+    main { padding: 12px; }
+    header { padding: 15px; flex-wrap: wrap; }
+    header h1 { font-size: 18px; }
+    .welcome { flex-wrap: wrap; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .middle, .bottom { grid-template-columns: 1fr; }
+    .stat, .panel, .table-panel { padding: 12px; }
+}
+</style>
+</head>
+
+<body>
+<div class="dashboard">
+
+<header>
+    <div>
+        <h1>⚡ Electricity Bill Management System</h1>
+        <p>Smart Power | Smart Billing | Easy Payment Tracking</p>
+    </div>
+    <div>Admin Dashboard</div>
+</header>
+
+<main>
+
+<div class="welcome">
+    <div>
+        <h2>Dashboard Overview</h2>
+        <p>Manage consumers, bills and payments.</p>
+    </div>
+    <div id="currentDate"></div>
+</div>
+
+<div id="notice" class="notice"></div>
+
+<section class="stats">
+    <div class="stat">
+        <p>Total Consumers</p>
+        <h2 class="blue" id="totalConsumers">0</h2>
+    </div>
+    <div class="stat">
+        <p>Total Bills</p>
+        <h2 class="green" id="totalBills">0</h2>
+    </div>
+    <div class="stat">
+        <p>Total Bill Amount</p>
+        <h2 class="orange" id="totalAmount">₹0</h2>
+    </div>
+    <div class="stat">
+        <p>Paid Bills</p>
+        <h2 class="purple" id="paidBills">0</h2>
+    </div>
+</section>
+
+<section class="middle">
+
+    <div class="panel">
+        <h3>Monthly Bill Summary</h3>
+        <div id="monthlySummary"></div>
+    </div>
+
+    <div class="panel">
+        <h3>System Modules</h3>
+        <div class="actions">
+            <button class="action blue" onclick="addConsumer()">
+                + Consumer Management
+            </button>
+            <button class="action green" onclick="recordMeter()">
+                + Meter Readings
+            </button>
+            <button class="action orange" onclick="generateBill()">
+                + Bill Generation
+            </button>
+            <button class="action purple" onclick="showPayments()">
+                Payment Records
+            </button>
+        </div>
+        <p style="margin-top:14px;font-size:12px;color:#64748b">
+            Bill calculation: ₹5 per unit. Change this rate in the JavaScript if required.
+        </p>
+    </div>
+
+</section>
+
+<section class="bottom">
+
+    <div class="table-panel" id="billSection">
+        <h3>Recent Electricity Bills</h3>
+        <input class="search" id="billSearch"
+               placeholder="Search bills by ID or consumer name...">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Bill ID</th>
+                    <th>Consumer Name</th>
+                    <th>Units</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="billTable"></tbody>
+        </table>
+    </div>
+
+    <div class="table-panel" id="consumerSection">
+        <h3>Consumer Details</h3>
+        <input class="search" id="consumerSearch"
+               placeholder="Search consumers by name or ID...">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Consumer Name</th>
+                    <th>Meter No.</th>
+                    <th>Connection</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="consumerTable"></tbody>
+        </table>
+    </div>
+
+</section>
+</main>
+
+<footer>
+    Electricity Bill Management System | DBMS Micro Project
+</footer>
+
+</div>
+
+<script>
+// Initial sample data
+const initialConsumers = [
+    {id:"C001", name:"Priya Sakhare", meter:"M1001", connection:"Domestic"},
+    {id:"C002", name:"Chaitali Chaudhari", meter:"M1002", connection:"Domestic"},
+    {id:"C003", name:"Akshat Barbate", meter:"M1003", connection:"Domestic"},
+    {id:"C004", name:"Prathmesh Rewatkar", meter:"M1004", connection:"Domestic"},
+    {id:"C005", name:"Khushi Dahake", meter:"M1005", connection:"Domestic"}
+];
+
+const initialBills = [
+    {id:"B001", consumerId:"C001", units:150, amount:1250, status:"Paid", month:"August"},
+    {id:"B002", consumerId:"C002", units:180, amount:1580, status:"Unpaid", month:"September"},
+    {id:"B003", consumerId:"C003", units:120, amount:950, status:"Paid", month:"October"},
+    {id:"B004", consumerId:"C004", units:100, amount:800, status:"Paid", month:"October"},
+    {id:"B005", consumerId:"C005", units:90, amount:700, status:"Unpaid", month:"October"}
+];
+
+// Load saved data or sample data
+function loadData(key, initialData) {
+    try {
+        const saved = localStorage.getItem(key);
+        if (saved !== null) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) return parsed;
+        }
+    } catch (error) {
+        console.error("Unable to load saved data:", error);
+    }
+    return initialData.map(item => ({...item}));
+}
+
+let consumers = loadData("ebms_consumers", initialConsumers);
+let bills = loadData("ebms_bills", initialBills);
+
+function saveData() {
+    try {
+        localStorage.setItem("ebms_consumers", JSON.stringify(consumers));
+        localStorage.setItem("ebms_bills", JSON.stringify(bills));
+    } catch (error) {
+        alert("Data could not be saved in this browser.");
+    }
+}
+
+function money(amount) {
+    return "₹" + Number(amount).toLocaleString("en-IN");
+}
+
+function showNotice(message) {
+    const notice = document.getElementById("notice");
+    notice.textContent = message;
+    notice.style.display = "block";
+}
+
+function hideNotice() {
+    document.getElementById("notice").style.display = "none";
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+    })[char]);
+}
+
+function nextId(items, prefix) {
+    let max = 0;
+    items.forEach(item => {
+        const match = item.id.match(/(\d+)$/);
+        if (match) max = Math.max(max, Number(match[1]));
+    });
+    return prefix + String(max + 1).padStart(3, "0");
+}
+
+// Update statistics and all dashboard tables
+function renderDashboard() {
+    saveData();
+
+    document.getElementById("totalConsumers").textContent = consumers.length;
+    document.getElementById("totalBills").textContent = bills.length;
+
+    const total = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+    const paid = bills.filter(bill => bill.status === "Paid").length;
+
+    document.getElementById("totalAmount").textContent = money(total);
+    document.getElementById("paidBills").textContent = paid;
+
+    renderBills();
+    renderConsumers();
+    renderMonthlySummary();
+}
+
+function renderBills() {
+    const search = document.getElementById("billSearch").value.toLowerCase();
+    const rows = bills.filter(bill => {
+        const consumer = consumers.find(c => c.id === bill.consumerId);
+        const name = consumer ? consumer.name : "Deleted consumer";
+        return bill.id.toLowerCase().includes(search) ||
+               name.toLowerCase().includes(search);
+    });
+
+    document.getElementById("billTable").innerHTML = rows.map(bill => {
+        const consumer = consumers.find(c => c.id === bill.consumerId);
+        const name = consumer ? consumer.name : "Deleted consumer";
+        const statusClass = bill.status === "Paid" ? "paid" : "unpaid";
+
+        return `
+        <tr>
+            <td>${escapeHTML(bill.id)}</td>
+            <td>${escapeHTML(name)}</td>
+            <td>${bill.units}</td>
+            <td>${money(bill.amount)}</td>
+            <td><span class="badge ${statusClass}">${bill.status}</span></td>
+            <td>
+                <button class="btn pay" onclick="togglePayment('${bill.id}')">
+                    ${bill.status === "Paid" ? "Mark Unpaid" : "Mark Paid"}
+                </button>
+                <button class="btn remove" onclick="deleteBill('${bill.id}')">
+                    Delete
+                </button>
+            </td>
+        </tr>`;
+    }).join("") || `<tr><td colspan="6">No bills found.</td></tr>`;
+}
+
+function renderConsumers() {
+    const search = document.getElementById("consumerSearch").value.toLowerCase();
+    const rows = consumers.filter(consumer =>
+        consumer.name.toLowerCase().includes(search) ||
+        consumer.id.toLowerCase().includes(search) ||
+        consumer.meter.toLowerCase().includes(search)
+    );
+
+    document.getElementById("consumerTable").innerHTML = rows.map(c => `
+        <tr>
+            <td>${escapeHTML(c.id)}</td>
+            <td>${escapeHTML(c.name)}</td>
+            <td>${escapeHTML(c.meter)}</td>
+            <td>${escapeHTML(c.connection)}</td>
+            <td>
+                <button class="btn remove" onclick="deleteConsumer('${c.id}')">
+                    Delete
+                </button>
+            </td>
+        </tr>
+    `).join("") || `<tr><td colspan="5">No consumers found.</td></tr>`;
+}
+
+function renderMonthlySummary() {
+    const months = ["August", "September", "October"];
+    const totals = months.map(month => ({
+        month,
+        amount: bills
+            .filter(b => b.month === month)
+            .reduce((sum, b) => sum + Number(b.amount), 0)
+    }));
+
+    const maxAmount = Math.max(...totals.map(m => m.amount), 1);
+
+    document.getElementById("monthlySummary").innerHTML = totals.map((item, i) => `
+        <div class="bar" style="
+            background:${["#1683f8","#16a05a","#f59e0b"][i]};
+            width:${Math.max(25, item.amount / maxAmount * 100)}%">
+            ${item.month} - ${money(item.amount)}
+        </div>
+    `).join("");
+}
+
+// Add a new consumer
+function addConsumer() {
+    hideNotice();
+
+    const name = prompt("Enter consumer full name:");
+    if (name === null) return;
+    if (!name.trim()) return alert("Consumer name is required.");
+
+    const meter = prompt("Enter unique meter number:");
+    if (meter === null) return;
+    if (!meter.trim()) return alert("Meter number is required.");
+
+    if (consumers.some(c =>
+        c.meter.toLowerCase() === meter.trim().toLowerCase()
+    )) {
+        return alert("This meter number already exists.");
+    }
+
+    const connectionInput = prompt(
+        "Enter connection type: Domestic or Commercial",
+        "Domestic"
+    );
+    if (connectionInput === null) return;
+
+    const connection = connectionInput.trim().toLowerCase();
+    if (!["domestic", "commercial"].includes(connection)) {
+        return alert("Enter Domestic or Commercial.");
+    }
+
+    consumers.push({
+        id: nextId(consumers, "C"),
+        name: name.trim(),
+        meter: meter.trim(),
+        connection: connection === "domestic" ? "Domestic" : "Commercial"
+    });
+
+    renderDashboard();
+    showNotice("Consumer added successfully.");
+}
+
+// Record the latest meter reading
+function recordMeter() {
+    if (consumers.length === 0) {
+        return alert("Please add a consumer first.");
+    }
+
+    const choices = consumers.map((c, i) =>
+        `${i + 1}. ${c.name} (${c.meter})`
+    ).join("\n");
+
+    const answer = prompt("Select consumer number:\n" + choices);
+    if (answer === null) return;
+
+    const index = Number(answer) - 1;
+    if (!Number.isInteger(index) || index < 0 || index >= consumers.length) {
+        return alert("Invalid consumer number.");
+    }
+
+    const unitsInput = prompt("Enter units consumed in this billing period:");
+    if (unitsInput === null) return;
+
+    const units = Number(unitsInput);
+    if (unitsInput.trim() === "" || !Number.isFinite(units) ||
+        units < 0 || !Number.isInteger(units)) {
+        return alert("Enter a valid non-negative whole number of units.");
+    }
+
+    const consumer = consumers[index];
+    const key = "ebms_reading_" + consumer.id;
+    const previous = Number(localStorage.getItem(key) || 0);
+
+    if (units < previous) {
+        return alert("Reading cannot be lower than the previous reading.");
+    }
+
+    localStorage.setItem(key, String(units));
+    showNotice(
+        "Meter reading saved for " + consumer.name +
+        ". Units since previous reading: " + (units - previous) + "."
+    );
+}
+
+// Generate a new bill from the meter reading
+function generateBill() {
+    if (consumers.length === 0) {
+        return alert("Please add a consumer first.");
+    }
+
+    const choices = consumers.map((c, i) =>
+        `${i + 1}. ${c.name} (${c.meter})`
+    ).join("\n");
+
+    const answer = prompt("Generate bill for consumer:\n" + choices);
+    if (answer === null) return;
+
+    const index = Number(answer) - 1;
+    if (!Number.isInteger(index) || index < 0 || index >= consumers.length) {
+        return alert("Invalid consumer number.");
+    }
+
+    const consumer = consumers[index];
+    const reading = localStorage.getItem("ebms_reading_" + consumer.id);
+
+    if (reading === null) {
+        return alert("Please record this consumer's meter reading first.");
+    }
+
+    const units = Number(reading);
+    if (units <= 0) {
+        return alert("Meter reading is zero. Record a valid reading first.");
+    }
+
+    const duplicate = bills.some(b =>
+        b.consumerId === consumer.id &&
+        b.month === new Date().toLocaleString("en-US", {month:"long"}) &&
+        b.year === new Date().getFullYear()
+    );
+
+    if (duplicate) {
+        return alert("A bill has already been generated for this consumer this month.");
+    }
+
+    const rate = 5;
+    const amount = units * rate;
+    const month = new Date().toLocaleString("en-US", {month:"long"});
+
+    bills.push({
+        id: nextId(bills, "B"),
+        consumerId: consumer.id,
+        units: units,
+        amount: amount,
+        status: "Unpaid",
+        month: month,
+        year: new Date().getFullYear()
+    });
+
+    renderDashboard();
+    showNotice("Bill generated for " + consumer.name + ": " + money(amount));
+}
+
+// Update payment status
+function togglePayment(id) {
+    const bill = bills.find(b => b.id === id);
+    if (!bill) return;
+
+    bill.status = bill.status === "Paid" ? "Unpaid" : "Paid";
+    renderDashboard();
+    showNotice("Payment status updated for " + bill.id + ".");
+}
+
+function showPayments() {
+    const paid = bills.filter(b => b.status === "Paid").length;
+    const unpaid = bills.length - paid;
+
+    showNotice(
+        "Payment Records: " + paid + " paid bills and " +
+        unpaid + " unpaid bills."
+    );
+
+    document.getElementById("billSection").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+function deleteBill(id) {
+    if (!confirm("Delete bill " + id + "?")) return;
+
+    bills = bills.filter(b => b.id !== id);
+    renderDashboard();
+    showNotice("Bill deleted.");
+}
+
+function deleteConsumer(id) {
+    const hasBills = bills.some(b => b.consumerId === id);
+
+    if (hasBills) {
+        return alert("This consumer has bills. Delete their bills first.");
+    }
+
+    if (!confirm("Delete this consumer?")) return;
+
+    consumers = consumers.filter(c => c.id !== id);
+    localStorage.removeItem("ebms_reading_" + id);
+
+    renderDashboard();
+    showNotice("Consumer deleted.");
+}
+
+// Search without reloading the page
+document.getElementById("billSearch").addEventListener("input", renderBills);
+document.getElementById("consumerSearch").addEventListener("input", renderConsumers);
+
+// Display the current date
+document.getElementById("currentDate").textContent =
+    new Date().toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
+
+// Start dashboard
+renderDashboard();
+</script>
+
+</body>
+</html>
